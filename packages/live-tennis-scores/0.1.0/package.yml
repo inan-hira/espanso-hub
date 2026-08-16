@@ -1,0 +1,36 @@
+matches:
+  # :tennis — one-line summary of up to 3 live matches, e.g.
+  # "Carlos Alcaraz 6-4 3-2* vs Jannik Sinner · Coco Gauff 2-6 1-1* vs Iga Swiatek"
+  # (* marks the set currently in play).
+  #
+  # Plain curl against the documented endpoint, then grep/awk (no jq needed):
+  # grep keeps only the player names and the per-set games arrays, awk pairs
+  # them up. Requires the LIVETENNIS_API_KEY environment variable (free key:
+  # https://livetennisapi.com/subscribe/free) — expands to a setup hint when
+  # it is not set.
+  - trigger: ":tennis"
+    replace: "{{live_scores}}"
+    vars:
+      - name: live_scores
+        type: shell
+        params:
+          cmd: |
+            if [ -z "$LIVETENNIS_API_KEY" ]; then
+              echo "Set LIVETENNIS_API_KEY — free key: livetennisapi.com/subscribe/free"
+              exit 0
+            fi
+            curl -s -H "Authorization: Bearer $LIVETENNIS_API_KEY" "https://api.livetennisapi.com/api/public/v1/matches?status=live&limit=3" \
+              | grep -o '"error":"[^"]*"\|"name":"[^"]*"\|"score":null\|"games":\[\[[0-9,]*\],\[[0-9,]*\]\]' \
+              | awk -F'"' '
+                  /"error"/ { print "Live Tennis API error: " $4; err = 1; exit }
+                  /"name"/  { n[++i] = $4 }
+                  /"score":null/ { o = o (o ? " · " : "") n[1] " vs " n[2]; i = 0 }
+                  /"games"/ {
+                    g = $0; sub(/^"games":\[\[/, "", g); sub(/\]\]$/, "", g)
+                    split(g, a, "\\],\\["); m = split(a[1], p, ","); split(a[2], q, ",")
+                    s = ""
+                    for (k = 1; k <= m; k++) if (p[k] != "") s = s " " p[k] "-" q[k]
+                    if (s != "") s = s "*"
+                    o = o (o ? " · " : "") n[1] s " vs " n[2]; i = 0
+                  }
+                  END { if (!err) print (o ? o : "No live matches right now") }'

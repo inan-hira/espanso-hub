@@ -1,0 +1,7 @@
+name: live-tennis-scores
+title: Live Tennis Scores
+description: Type :tennis to expand a one-line summary of live tennis matches (via the Live Tennis API, free key required)
+version: 0.1.0
+author: Live Tennis API
+homepage: "https://livetennisapi.com"
+tags: ["sports", "tennis", "live-scores", "utility"]
