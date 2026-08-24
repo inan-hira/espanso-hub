@@ -14,6 +14,7 @@ matches:
       - name: live_scores
         type: shell
         params:
+          shell: bash
           cmd: |
             if [ -z "$LIVETENNIS_API_KEY" ]; then
               echo "Set LIVETENNIS_API_KEY — free key: livetennisapi.com/subscribe/free"
