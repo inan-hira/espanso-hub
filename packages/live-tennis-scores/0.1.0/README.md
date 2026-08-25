@@ -65,22 +65,20 @@ API reference for the endpoint and fields:
 
 ### Windows (via WSL)
 
-The pipeline assumes a POSIX shell, and espanso's default shell on Windows is
-PowerShell — so out of the box the trigger does not work on Windows. Espanso
-can route a shell variable through WSL, but `shell: wsl` is a Windows-only
-value and espanso has no per-OS switch inside one package, so the package
-ships with the POSIX default and Windows users need two small local edits:
+The pipeline assumes a POSIX shell. The package sets `shell: bash` on the
+trigger, which espanso routes through **WSL** on Windows — so no edits to
+`package.yml` are needed. You just need WSL set up:
 
-1. In your local copy of `package.yml`, add `shell: wsl` under the variable's
-   `params:` (next to `cmd:`).
+1. Install [WSL](https://learn.microsoft.com/windows/wsl/install) with a
+   distribution that has `curl` (Ubuntu ships it by default).
 2. Make the key visible *inside* WSL: either `export LIVETENNIS_API_KEY=...`
    in your WSL shell profile, or forward the Windows variable with
    [`WSLENV`](https://learn.microsoft.com/windows/wsl/filesystems#share-environment-variables-between-windows-and-wsl-with-wslenv)
    (`setx WSLENV LIVETENNIS_API_KEY/u`) — a Windows-side variable does not
    cross into WSL on its own.
 
-Requires WSL with `curl` installed in the distribution (Ubuntu has it by
-default).
+On Linux and macOS `shell: bash` is the native shell, so the trigger works as
+described above with no extra steps.
 
 ## License
 
